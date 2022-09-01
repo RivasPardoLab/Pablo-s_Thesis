@@ -1,0 +1,78 @@
+# NAMD i/o file
+
+set i 0
+set sys ionized_solvate_I10
+
+# --- integration ---
+numsteps             20000
+minimization         on
+
+# --- input files ---
+paraTypeCharmm	     on
+parameters           par_all36_prot_lipid_water_ions.prm
+structure            $sys.psf
+coordinates          $sys.pdb
+
+# --- output files ---
+binaryoutput         no
+outputname           $sys.mini.$i
+restartname          $sys.mini.$i.rst
+restartfreq          100
+restartsave          no
+binaryrestart        yes
+DCDfile              $sys.mini.$i.dcd
+DCDfreq              1000
+DCDUnitCell          yes
+
+# --- stdout options ---
+outputEnergies       100
+mergeCrossterms      no
+outputMomenta        0
+outputPressure       0
+outputTiming         100
+
+# --- constraints ---
+rigidBonds           all
+rigidTolerance       0.00000001
+rigidIterations      100
+useSettle            on
+
+# -- non-bonded interactions ---
+exclude              scaled1-4
+1-4scaling           1.0
+switching            on
+switchdist           8
+cutoff               9
+dielectric           1.0
+PME                  yes
+vdwForceSwitching    yes
+PMEGridSpacing       1.2
+PMETolerance         0.000001
+PMEInterpOrder       6
+
+# -- MTS --
+nonbondedFreq        1
+fullElectFrequency   1
+
+# --- non-bonded list ---
+stepspercycle        10
+pairlistdist         11
+pairlistsPerCycle    2
+pairlistShrink       0.01
+pairlistGrow         0.01
+pairlistTrigger      0.30
+
+# --- boundary options ---
+cellOrigin           0.00  0.00   0.00
+cellBasisVector1     99.731   0      0
+cellBasisVector2       0    447.921  0
+cellBasisVector3       0    0      99.052 
+XSTfile              $sys.mini.$i.xst
+XSTfreq              100
+wrapWater            on
+wrapAll              on
+wrapNearest          on
+
+
+
+

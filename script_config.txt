@@ -1,0 +1,150 @@
+####################################################
+### vecnorm y fijar Ca a desplazar dinamica.ref ####
+####################################################
+
+#beta o "desfijar" beta 1 fijar
+set smallatoms [atomselect top all]  #beta
+$smallatoms set beta 0
+set fixedatom [atomselect top "resid 2877 and name CA"] #middle CA
+$fixedatom set beta 1
+
+#CA a estirar
+$smallatoms set occupancy 0
+set smdatom [atomselect top "resid 2833 and name CA"] #primer CA
+$smdatom set occupancy 14.39  #14.39 para 2000pN #28.78 #14.39 para 1000pN
+set smdatom2 [atomselect top "resid 2921 and name CA"] #fin CA
+$smdatom2 set occupancy 14.39
+
+#vector para estirar
+set smdpost [lindex [$smdatom get {x y z}] 0]
+set smdpost2 [lindex [$smdatom2 get {x y z}] 0]
+
+
+#fijar vectornormal
+vecnorm [vecsub $smdpost $smdpost2]
+
+##############
+## I10 wild ##
+##############
+$smdatom set x 0.0009800425336502021 
+$smdatom set y -0.9829775968250103
+$smdatom set z -0.18372284467849934
+
+#!!!!!!!!!!!!!!SIGNOS OPUESTOS!!!!!!!!!!!!!!!
+$smdatom2 set x -0.0009800425336502021 
+$smdatom2 set y 0.9829775968250103
+$smdatom2 set z 0.18372284467849934
+
+##############
+## I10 glut ##
+##############
+$smdatom set x -0.015805998425160006 
+$smdatom set y -0.9868062665386299
+$smdatom set z -0.1611321281863872
+
+#!!!!!!!!!!!!!!SIGNOS OPUESTOS!!!!!!!!!!!!!!!
+$smdatom2 set x 0.015805998425160006
+$smdatom2 set y 0.9868062665386299
+$smdatom2 set z 0.1611321281863872
+
+##############
+## I10 glut ##
+##############
+$smdatom set x -0.06743187168698582
+$smdatom set y -0.9866265402556181
+$smdatom set z -0.14839478678181092
+
+#!!!!!!!!!!!!!!SIGNOS OPUESTOS!!!!!!!!!!!!!!!
+$smdatom2 set x 0.06743187168698582
+$smdatom2 set y 0.9866265402556181
+$smdatom2 set z 0.14839478678181092
+
+#############
+## I10 MUT ##
+#############
+$smdatom set x -0.08189081132649675 
+$smdatom set y -0.9897779957656047
+$smdatom set z -0.11676221186030601
+
+#!!!!!!!!!!!!!!SIGNOS OPUESTOS!!!!!!!!!!!!!!!
+$smdatom2 set x 0.08189081132649675  
+$smdatom2 set y 0.9897779957656047
+$smdatom2 set z 0.11676221186030601
+
+#######################
+## I10 MUT GLUT 2909 ##
+#######################
+$smdatom set x -0.04792345425832424 
+$smdatom set y -0.9885484583469862
+$smdatom set z -0.14309188667337913
+
+#!!!!!!!!!!!!!!SIGNOS OPUESTOS!!!!!!!!!!!!!!!
+$smdatom2 set x 0.04792345425832424   
+$smdatom2 set y 0.9885484583469862
+$smdatom2 set z 0.14309188667337913
+
+#######################
+## I10 MUT GLUT 2857 ##
+#######################
+$smdatom set x -0.06755764409382499
+$smdatom set y -0.9866435840575305
+$smdatom set z -0.14822416389577922
+
+#!!!!!!!!!!!!!!SIGNOS OPUESTOS!!!!!!!!!!!!!!!
+$smdatom2 set x 0.06755764409382499  
+$smdatom2 set y 0.9866435840575305
+$smdatom2 set z 0.14822416389577922
+
+
+#OUTPUT #fijar nombre
+$smallatoms writepdb dinamica.ref
+
+#########
+#colvars#
+#########
+
+set new [atomselect top "protein name CA"]
+$new get serial
+#wild type
+5 22 37 51 70 87 106 120 142 156 173 195 209 228 243 261 273 288 302 324 338 348 359 379 394 405 420 436 447 464 484 498 516 528 539 556 580 599 621 635 642 658 673 692 707 724 735 750 772 792 814 833 849 865 882 889 911 930 947 964 983 1002 1021 1038 1052 1066 1077 1091 1106 1118 1129 1139 1154 1175 1189 1209 1225 1236 1243 1257 1269 1286 1302 1313 1323 1337 1356 1370 1386
+#mutante
+5 22 37 51 70 87 106 120 142 156 173 195 209 228 243 261 273 288 307 329 343 353 364 384 399 410 425 441 452 469 489 503 521 533 544 561 585 604 626 640 647 663 678 697 712 729 740 755 777 797 819 838 854 870 887 894 916 935 952 969 988 1007 1026 1043 1057 1071 1082 1096 1111 1123 1134 1144 1159 1180 1194 1214 1230 1241 1248 1262 1274 1291 1307 1318 1328 1342 1361 1375 1391
+
+set var_1 [measure center $new weight mass]
+0.051752571016550064 0.12400028109550476 -0.09749127924442291
+
+
+##############################
+## positions #################
+##############################
+
+#seleccionamos el carbono alfa de ALA1 y ALA10
+set sel [atomselect top "residue 0 and name CA or residue 88 and name CA"]
+#obtengo la posicion de ambas ALA segun x y z
+$sel get {x y z}
+
+#creo un archivo al cual introducir los datos 
+set output [open "Pos_mut1000_2.dat" w]
+
+#obtengo la cantidad de frames para hacer el análisis de posiciones de las ALA por cada uno de ellos
+set n [molinfo top get numframes]
+
+#hago un ciclo que valla desde 0 a 998
+for { set i 0 } { $i < $n } { incr i } {
+  $sel frame $i
+  $sel update
+ # $sel get {x y z}
+  #puts $output $i
+  puts $output [ $sel get {x y z} ]
+  #set i [expr { $i+1 } ]
+}
+close $output
+
+#####################
+## angle movements ##
+#####################
+set pro [atomselect top all]
+$pro moveby [vecinvert [measure center $pro]]  $glu moveby [vecinvert [measure center $glu]]
+$pro move [transaxis y 20]
+$pro writepdb I10_fin.pdb
+$pro writepsf I10_fin.psf

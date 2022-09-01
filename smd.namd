@@ -1,0 +1,135 @@
+#############################################################
+## JOB DESCRIPTION                                         ##
+#############################################################
+
+# SMD simulation (stretching) of deca-alanine 
+
+#############################################################
+## ADJUSTABLE PARAMETERS                                   ##
+#############################################################
+# NAMD i/o file
+
+set sys ionized
+set i 2
+set j [expr $i - 1]
+set restart yes
+
+
+#############################################################
+## SIMULATION PARAMETERS                                   ##
+#############################################################
+# --- integration ---
+numsteps             400000
+timestep             4.0
+#firsttimestep        0
+
+# --- input files ---
+paraTypeCharmm       on
+parameters           par_all36_prot_lipid_water_ions.prm
+structure            ionized_REP.psf
+coordinates          $sys.pdb
+if { $restart == "no" } {
+temperature          298
+} else {
+bincoordinates       $sys.smd.$j.rst.coor
+binvelocities        $sys.smd.$j.rst.vel
+}
+
+# --- output files ---
+binaryoutput         no
+outputname           $sys.smd.$i
+restartname          $sys.smd.$i.rst
+restartfreq          1000 
+restartsave          no
+binaryrestart        yes
+DCDfile              $sys.smd.$i.dcd
+DCDfreq              1000
+DCDUnitCell          yes
+ 
+# --- stdout options ---
+outputEnergies       1000 
+mergeCrossterms      no
+outputMomenta        0
+outputPressure       0
+outputTiming         1000 
+
+# --- langevin options ---
+langevin             on
+langevinTemp         298
+langevinDamping        1
+langevinHydrogen     off
+
+# --- pressure ---
+useGroupPressure     yes
+useFlexibleCell      yes
+#useConstantArea      yes #fix membrane
+#useConstantRatio     yes #flexible membrane
+LangevinPiston       on
+LangevinPistonTarget 1.01325
+LangevinPistonPeriod 400
+LangevinPistonDecay  300
+LangevinPistonTemp   298
+
+# --- constraints ---
+rigidBonds           all
+rigidTolerance       0.00000001
+rigidIterations      100
+useSettle            on
+
+# -- non-bonded interactions ---
+exclude              scaled1-4
+1-4scaling           1.0
+switching            on
+switchdist           8
+cutoff               9
+dielectric           1.0
+vdwForceSwitching    yes
+PME                  yes
+PMEGridSpacing	     1.2
+PMETolerance         0.000001
+PMEInterpOrder       6
+
+# -- MTS --
+nonbondedFreq        1
+fullElectFrequency   1
+
+# --- non-bonded list ---
+stepspercycle        10
+pairlistdist         11
+pairlistsPerCycle    2
+pairlistShrink       0.01
+pairlistGrow         0.01
+pairlistTrigger      0.30 
+
+# --- boundary options ---
+if { $restart == "no" } {
+cellOrigin           0.00  0.00   0.00
+cellBasisVector1     99.731   0      0
+cellBasisVector2       0    447.921  0
+cellBasisVector3       0    0      99.052  
+} else {
+extendedSystem       $sys.smd.$j.rst.xsc
+}
+XSTfile              $sys.smd.$i.xst
+XSTfreq              100
+wrapWater            on
+wrapAll              on
+wrapNearest          on
+
+#############################################################
+## EXTRA PARAMETERS                                        ##
+#############################################################
+
+# --- colvars ---
+if {1} {
+colvars on
+ColvarsConfig colvars.colvars
+}
+
+if {1} { 	
+fixedAtomsFile  fixedAtomsFile
+
+}
+constantforce 	yes
+consforcefile 	dinamica.ref
+
